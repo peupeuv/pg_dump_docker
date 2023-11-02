@@ -44,9 +44,9 @@ jobs:
 
         run: |
 
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/store-manager:latest .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/pg_dump:latest .
 
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/store-manager:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pg_dump:latest
 
 
 
