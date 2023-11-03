@@ -1,4 +1,4 @@
-FROM postgres:latest
+FROM ubuntu:20.04
 
 # Define environment variables
 ENV DB_HOST=db
@@ -11,6 +11,7 @@ ENV DB_PORT=port
 # Update and install cron
 RUN apt-get update && \
     apt-get install -y cron && \
+    postgresql-client && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
