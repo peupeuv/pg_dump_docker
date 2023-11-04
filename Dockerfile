@@ -1,12 +1,5 @@
 FROM ubuntu:20.04
 
-# Define environment variables
-ENV DB_HOST=db
-ENV DB_USER=user
-ENV DB_PASSWORD=password
-ENV DB_NAME=database
-ENV DB_PORT=port
-
 
 # Update and install cron
 RUN apt-get update && \
