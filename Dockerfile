@@ -4,7 +4,7 @@ FROM ubuntu:20.04
 # Update and install cron
 RUN apt-get update && \
     apt-get install -y cron \
-    postgresql-client && \
+    postgresql-client-13 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
