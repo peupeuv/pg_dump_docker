@@ -30,8 +30,9 @@ COPY crontab /etc/cron.d/backup-cron
 # Permissions and log file
 RUN chmod 0644 /etc/cron.d/backup-cron && \
     chmod +x /backup.sh && \
-    crontab /etc/cron.d/backup-cron && \
-    touch /var/log/cron.log
+    crontab /etc/cron.d/backup-cron
+    #touch /var/log/cron.log
 
 # Redirect logs to JSON file
-CMD cron && tail -f /var/log/cron.log
+#CMD cron && tail -f /var/log/cron.log
+CMD cron -f
