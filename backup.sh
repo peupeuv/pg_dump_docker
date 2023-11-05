@@ -1,10 +1,17 @@
 #!/bin/bash
 
-DATE=$(date +%Y%m%d%H%M%S)
-PGPASSWORD="${DB_PASSWORD}" pg_dump -h $DB_HOST -U $DB_USER -Fd $DB_NAME -f /backups/db-$DATE -j 5 -v
+# Start the backup and time it
+START=$(date +%s)
+PGPASSWORD="${DB_PASSWORD}" pg_dump -h "$DB_HOST" -U "$DB_USER" -Fd "$DB_NAME" -f "$BACKUP_FILE" -j 5 -v
+STATUS=$?
+END=$(date +%s)
 
-if [ ${PIPESTATUS[0]} -eq 0 ]; then
-    echo "Backup completed successfully at $DATE" 
+# Calculate duration
+DURATION=$((END - START))
+
+# Log the outcome
+if [ $STATUS -eq 0 ]; then
+    echo "$(date +"%Y-%m-%d %H:%M:%S") Backup completed successfully in $DURATION seconds"
 else
-    echo "Backup failed at $DATE" 
+    echo "$(date +"%Y-%m-%d %H:%M:%S") Backup failed after $DURATION seconds"
 fi
