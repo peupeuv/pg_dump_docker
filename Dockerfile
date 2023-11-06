@@ -1,4 +1,6 @@
+# Start from the official Ubuntu base image
 FROM ubuntu:20.04
+LABEL org.opencontainers.image.authors="saidi.ppv@gmail.com"
 
 # Avoid prompts from apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -8,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     wget \
     ca-certificates \
-    cron && \
+    cron \
     rm -rf /var/lib/apt/lists/*
 
 # Add PostgreSQL's repository. It contains the most recent stable release
@@ -23,16 +25,19 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
-# Copy necessary files
+ENV PREFIX="dump"
+ENV RETAIN_COUNT=10  
+
+# Copy necessary scripts
 COPY backup.sh /backup.sh
-COPY crontab /etc/cron.d/backup-cron
+COPY entrypoint.sh /entrypoint.sh
 
-# Permissions and log file
-RUN chmod 0644 /etc/cron.d/backup-cron && \
-    chmod +x /backup.sh && \
-    crontab /etc/cron.d/backup-cron
-    #touch /var/log/cron.log
+# Set the proper permissions
+RUN chmod +x /backup.sh && \
+    chmod +x /entrypoint.sh
 
-# Redirect logs to JSON file
-#CMD cron && tail -f /var/log/cron.log
-CMD cron -f
+# Set the user to run the cron job
+USER root
+
+# Run the command on container startup
+ENTRYPOINT ["/entrypoint.sh"]

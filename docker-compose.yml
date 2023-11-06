@@ -1,0 +1,23 @@
+version: '3.3'
+services:
+  backup:
+    image: peupeuv/pg_dump:latest
+    environment:
+      DB_HOST: host # db service name
+      DB_NAME: db # target db 
+      DB_PASSWORD: passwd
+      DB_USER: user
+      CRON_SCHEDULE: 0 1 * * * # Every day at 1am
+      RETAIN_COUNT: 1 # Keep this number of backups [1:DEV], use proper startegy
+    volumes:
+     - backup_volume:/backups
+    networks:
+     - my_network_default
+    logging:
+      driver: json-file
+networks:
+  my_network_default:
+    external: true
+volumes:
+  backup_volume:
+    driver: local

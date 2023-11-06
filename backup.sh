@@ -1,23 +1,36 @@
 #!/bin/bash
+# backup.sh - Backup script for PostgreSQL
 
-NOW=$(date +"%Y-%m-%d_%H-%M-%S")
+# Default values for the backup script
+PREFIX=${PREFIX:-dump}
+DB_USER=${PGUSER:-postgres}
+DB_PORT=${PGPORT:-5432}
+BACKUP_DIR=${BACKUP_DIR:-'/backups'}
+RETAIN_COUNT=${RETAIN_COUNT:-10}  # Number of backups to retain
 
-# Filename for backup
-BACKUP_FILE="/backups/db-$NOW"
+# Format for the backup file name
+DATE=$(date +"%Y-%m-%d_%H-%M-%S")
+BACKUP_FILE="$BACKUP_DIR/$PREFIX-$DATE"
 
 
-# Start the backup and time it
-START=$(date +%s)
-PGPASSWORD="${DB_PASSWORD}" pg_dump -h "$DB_HOST" -U "$DB_USER" -Fd "$DB_NAME" -f "$BACKUP_FILE" -j 5 -v
+# Logging
+echo "--------"
+echo "Backup job started at $(date). Saving to ${BACKUP_FILE}"
+
+# Perform the backup
+export PGPASSWORD=${DB_PASSWORD}
+pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fd -f "${BACKUP_FILE}" -d "${DB_NAME}" -j 5 -v
 STATUS=$?
-END=$(date +%s)
 
-# Calculate duration
-DURATION=$((END - START))
-
-# Log the outcome
-if [ $STATUS -eq 0 ]; then
-    echo "$(date +"%Y-%m-%d %H:%M:%S") Backup completed successfully in $DURATION seconds"
+if [[ -n "${RETAIN_COUNT}" ]]; then
+    file_count=1
+    for file_name in $(ls -t $BACKUP_DIR/*.gz); do
+        if (( ${file_count} > ${RETAIN_COUNT} )); then
+            echo "Removing older dump file: ${file_name}"
+            rm "${file_name}"
+        fi
+        ((file_count++))
+    done
 else
-    echo "$(date +"%Y-%m-%d %H:%M:%S") Backup failed after $DURATION seconds"
+    echo "No RETAIN_COUNT! Take care with disk space."
 fi
