@@ -13,23 +13,23 @@ BACKUP_FILE="$BACKUP_DIR/$PREFIX-$DATE"
 
 
 # Logging
-echo "--------"
-echo "Backup job started at $(date). Saving to ${BACKUP_FILE}"
+echo "--------"  >> /proc/1/fd/1 2>> /proc/1/fd/2
+echo "Backup job started at $(date). Saving to ${BACKUP_FILE}" >> /proc/1/fd/1 2>> /proc/1/fd/2
 
 # Perform the backup
 export PGPASSWORD=${DB_PASSWORD}
-pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fd -f "${BACKUP_FILE}" -d "${DB_NAME}" -j 5 -v
+pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fd "${DB_NAME}" -f "${BACKUP_FILE}" -j 5 -v
 STATUS=$?
 
 if [[ -n "${RETAIN_COUNT}" ]]; then
     file_count=1
     for file_name in $(ls -t $BACKUP_DIR/*.gz); do
         if (( ${file_count} > ${RETAIN_COUNT} )); then
-            echo "Removing older dump file: ${file_name}"
+            echo "Removing older dump file: ${file_name}" >> /proc/1/fd/1 2>> /proc/1/fd/2
             rm "${file_name}"
         fi
         ((file_count++))
     done
 else
-    echo "No RETAIN_COUNT! Take care with disk space."
+    echo "No RETAIN_COUNT! Take care with disk space." >> /proc/1/fd/1 2>> /proc/1/fd/2
 fi
