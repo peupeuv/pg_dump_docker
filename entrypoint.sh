@@ -39,10 +39,10 @@ CRON_ENV="PREFIX='$PREFIX'\nDB_USER='${DB_USER}'\nDB_HOST='${DB_HOST}'\nDB_NAME=
 # Do not print passwords or any sensitive information on the logs
 # echo -e "$CRON_SCHEDULE /backup.sh >> ${BACKUP_DIR}/backup-log 2>&1" | crontab -
 
-echo -e "$CRON_SCHEDULE /backup.sh >> ${BACKUP_DIR}/backup-log 2>&1" | crontab -
+echo -e "$CRON_ENV\n$CRON_SCHEDULE /backup.sh > /dev/null 2>&1" | crontab -
 
 # Log the current crontab entries
-crontab -l | tee "${BACKUP_DIR}/backup-log" 2>&1
+#crontab -l | tee "${BACKUP_DIR}/backup-log" 2>&1
 
 # Start cron in the foreground
 cron -f
