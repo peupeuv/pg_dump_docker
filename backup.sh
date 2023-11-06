@@ -14,9 +14,10 @@ BACKUP_FILE="$BACKUP_DIR/$PREFIX-$DATE"
 
 # Logging
 echo "--------"  >> /proc/1/fd/1 2>> /proc/1/fd/2
-echo "Backup job started at $(date +"%Y-%m-%d_%H:%M:%S").\nSaving to ${BACKUP_FILE}" >> /proc/1/fd/1 2>> /proc/1/fd/2
+echo "[$(date +"%Y-%m-%d %H:%M:%S")] Dumping to: ${BACKUP_FILE}" >> /proc/1/fd/1 2>> /proc/1/fd/2
 
 # Perform the backup
+# pg_dump verbosity is only for debugging, remove it or rediect it to proper logfile.
 PGPASSWORD="${DB_PASSWORD}" pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fd "${DB_NAME}" -f "${BACKUP_FILE}" -j 5 -v >> /proc/1/fd/1 2>> /proc/1/fd/2
 STATUS=$?
 
@@ -28,14 +29,15 @@ else
 fi
 
 if [[ -n "${RETAIN_COUNT}" ]]; then
-    file_count=1
-    for file_name in $(ls -t $BACKUP_DIR/*.gz); do
-        if (( ${file_count} > ${RETAIN_COUNT} )); then
-            echo "Removing older dump file: ${file_name}" >> /proc/1/fd/1 2>> /proc/1/fd/2
-            rm "${file_name}"
+    dir_count=1
+    # List the backup directories by their creation time, newest first
+    for dir_name in $(ls -td $BACKUP_DIR/$PREFIX*/); do
+        if (( ${dir_count} > ${RETAIN_COUNT} )); then
+            echo "[$(date +"%Y-%m-%d %H:%M:%S")] Removing older dump directory: ${dir_name}" >> /proc/1/fd/1 2>> /proc/1/fd/2
+            rm -r "${dir_name}"
         fi
-        ((file_count++))
+        ((dir_count++))
     done
 else
-    echo "No RETAIN_COUNT! Take care with disk space." >> /proc/1/fd/1 2>> /proc/1/fd/2
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")][WARN] No RETAIN_COUNT set! Take care with disk space." >> /proc/1/fd/1 2>> /proc/1/fd/2
 fi
