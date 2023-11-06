@@ -2,8 +2,8 @@
 
 # Default values for the backup script
 PREFIX=${PREFIX:-dump}
-DB_USER=${PGUSER:-postgres}
-DB_PORT=${PGPORT:-5432}
+DB_USER=${DB_USER:-postgres}
+DB_PORT=${DB_PORT:-5432}
 BACKUP_DIR=${BACKUP_DIR:-'/backups'}
 RETAIN_COUNT=${RETAIN_COUNT:-10}  # Number of backups to retain
 
@@ -14,7 +14,7 @@ BACKUP_FILE="$BACKUP_DIR/$PREFIX-$DATE"
 
 # Logging
 echo "--------"  >> /proc/1/fd/1 2>> /proc/1/fd/2
-echo "Backup job started at $(date). Saving to ${BACKUP_FILE}" >> /proc/1/fd/1 2>> /proc/1/fd/2
+echo "Backup job started at $(date +"%Y-%m-%d_%H:%M:%S").\nSaving to ${BACKUP_FILE}" >> /proc/1/fd/1 2>> /proc/1/fd/2
 
 # Perform the backup
 PGPASSWORD="${DB_PASSWORD}" pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fd "${DB_NAME}" -f "${BACKUP_FILE}" -j 5 -v >> /proc/1/fd/1 2>> /proc/1/fd/2
