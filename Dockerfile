@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     wget \
     ca-certificates \
-    cron \
+    cron && \
     rm -rf /var/lib/apt/lists/*
 
 # Add PostgreSQL's repository. It contains the most recent stable release

@@ -1,5 +1,4 @@
 #!/bin/bash
-# backup.sh - Backup script for PostgreSQL
 
 # Default values for the backup script
 PREFIX=${PREFIX:-dump}
