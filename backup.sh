@@ -18,8 +18,15 @@ echo "Backup job started at $(date). Saving to ${BACKUP_FILE}" >> /proc/1/fd/1 2
 
 # Perform the backup
 export PGPASSWORD=${DB_PASSWORD}
-pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fd "${DB_NAME}" -f "${BACKUP_FILE}" -j 5 -v
+pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -Fd "${DB_NAME}" -f "${BACKUP_FILE}" -j 5 -v >> /proc/1/fd/1 2>> /proc/1/fd/2
 STATUS=$?
+
+if [ $STATUS -eq 0 ]; then
+    echo "Backup completed successfully."  >> /proc/1/fd/1 2>> /proc/1/fd/2
+else
+    echo "Backup failed with status: $STATUS"  >> /proc/1/fd/1 2>> /proc/1/fd/2
+    exit $STATUS
+fi
 
 if [[ -n "${RETAIN_COUNT}" ]]; then
     file_count=1
