@@ -6,7 +6,8 @@
 BACKUP_DIR=${BACKUP_DIR:-'/backups'}
 
 # Log startup
-echo "Starting pg_dump" >> /proc/1/fd/1 2>> /proc/1/fd/2 | tee "${BACKUP_DIR}/dump-log"
+echo "--------"  >> /proc/1/fd/1 2>> /proc/1/fd/2
+echo "[$(date +"%Y-%m-%d_%H:%M:%S")] Container Initiated: Starting pg_dump" >> /proc/1/fd/1 2>> /proc/1/fd/2 | tee "${BACKUP_DIR}/dump-log"
 
 # Set default values if not provided
 CRON_SCHEDULE=${CRON_SCHEDULE:-'0 1 * * *'}
@@ -31,9 +32,13 @@ else
 fi
 
 # Set environment variables for cron
-CRON_ENV="PREFIX='$PREFIX'\nDB_USER='${DB_USER}'\nDB_HOST='${DB_HOST}'\nPOSTGRES_DB='${DB_NAME}'\nDB_PORT='${DB_PORT}'\nBACKUP_DIR='${BACKUP_DIR}'\nPOSTGRES_PASSWORD='${DB_PASSWORD}'"
+# it is not recommanded to use env var for passwords 
+CRON_ENV="PREFIX='$PREFIX'\nDB_USER='${DB_USER}'\nDB_HOST='${DB_HOST}'\nDB_NAME='${DB_NAME}'\nDB_PORT='${DB_PORT}'\nBACKUP_DIR='${BACKUP_DIR}'\nDB_PASSWORD='${DB_PASSWORD}'"
 
 # Add environment variables to the cron environment
+# Do not print passwords or any sensitive information on the logs
+# echo -e "$CRON_SCHEDULE /backup.sh >> ${BACKUP_DIR}/backup-log 2>&1" | crontab -
+
 echo -e "$CRON_ENV\n$CRON_SCHEDULE /backup.sh >> ${BACKUP_DIR}/backup-log 2>&1" | crontab -
 
 # Log the current crontab entries
